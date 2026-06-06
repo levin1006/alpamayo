@@ -6,7 +6,7 @@ task_id: alpamayo-rnd-root
 parent_plan: docs/2026-05-27 [Plan] Alpamayo Research and Development v3.md
 parent_task:
 created_at: 2026-05-26 18:24:55 KST
-updated_at: 2026-06-06 20:35:48 KST
+updated_at: 2026-06-07 00:57:10 KST
 ---
 
 # Alpamayo R&D Root Task
@@ -28,7 +28,7 @@ updated_at: 2026-06-06 20:35:48 KST
 | Subtask | Status | Required | Owner | First action |
 | --- | --- | --- | --- | --- |
 | A0 Environment and Access Baseline | done | yes | Manager | Review existing Track A Task |
-| A1 Code and Model Flow Study | in_progress | yes | Manager + VLA Expert + Teacher | Create study Subtask and handoff outputs |
+| A1 Code and Model Flow Study | done | yes | Manager + VLA Expert + Teacher | Closed; use A1 contract for A2-A4 |
 | A2 PAI Dataset Literacy and Storage Strategy | not_started | yes | Manager + VLA Expert + Teacher | Build manifest and subset budget |
 | A3 Inference Experiment Suite | not_started | yes | Manager + VLA Expert + Teacher | Run 5-clip pilot matrix |
 | A4 Visualization and Demo Lab | not_started | yes | Manager + VLA Expert + Teacher | Export first notebook visuals |
@@ -72,27 +72,34 @@ Reference:
 
 ### A1 Code and Model Flow Study
 
-Status: `in_progress`
+Status: `done`
 
 Purpose:
 
 - Establish an explainable code path from PAI clip input to CoC text and `pred_xyz`.
 - Split work between VLA Expert evidence gathering and Teacher user-facing review material.
 
-Expected outputs:
+Outputs:
 
 - `docs/2026-06-06 [Task] Track A1 Alpamayo Code and Model Flow Study.md`
-- Expert report path defined by the A1 Subtask.
-- Teacher note path defined by the A1 Subtask.
+- `docs/2026-06-06 [Report] Track A1 Expert Code Path Analysis.md`
+- `docs/2026-06-06 [Review] Track A1 Expert Code Path Review.md`
+- `docs/2026-06-06 [Note] Track A1 Code Flow Review Guide.md`
+
+Manager decision:
+
+- User understanding gate is satisfied for the minimum A1 scope.
+- A2 should start before A3/A4 so dataset/storage profiles are explicit before broader runtime
+  experiments and visualization outputs.
 
 ### A2-A8 Phase A Baseline Lab
 
 Status: `not_started`
 
-Next condition:
+Next order:
 
-- Start A2 after A1 Subtask is created and the first Expert/Teacher handoff shape is validated.
-- A3/A4 should wait until A1 explains the inference path and A2 identifies safe data profiles.
+- Start A2 first: PAI manifest, component/chunk profile, storage budget, and approved pilot subset.
+- Then run A3 and A4 together or back-to-back on the A2-approved subset.
 - A5-A8 remain queued until their first-gate blocker or smoke scope is explicitly opened.
 
 ### B/C Dataset Mapping
@@ -119,8 +126,12 @@ Next condition:
   - The AlpaSim failure is now classified under A5 simulator/runtime work, not A0 environment
     reproduction.
   - v3 is now the canonical Plan and reframes Phase A as Alpamayo Baseline Lab.
-  - A1 is open to establish a code/model flow understanding baseline before larger experiments.
-  - A2-A4 are next Phase A gates after the A1 handoff pattern is validated.
+  - A1 code/model flow study is closed. The user understanding gate is satisfied for the
+    official `test_inference.py` path and its limits.
+  - A2 is the next entry point. It should define PAI data/storage profiles before A3 inference
+    sweeps or A4 visualization demos.
+  - A3/A4 should record runtime-loaded config, `num_traj_samples`, seed, clip selection, and
+    output schema as fresh evidence.
   - B/C are deferred until A1-A4 become reviewable, unless explicitly opened as low-priority
     parallel tasks.
 - Current canonical Plan: `docs/2026-05-27 [Plan] Alpamayo Research and Development v3.md`
@@ -152,6 +163,7 @@ Next condition:
 | 2026-06-06 13:51:36 KST | v3 canonical Plan approved | User approved v3 and requested a multi-session Manager/VLA Expert/Teacher operating model |
 | 2026-06-06 13:51:36 KST | A1 Subtask opened | First v3 step is to make the Alpamayo code/model flow explainable before larger data and experiment work |
 | 2026-06-06 20:35:48 KST | A0 official environment reproduction closed | CUDA Toolkit 12.8 enables README `uv sync --active`, locked `flash-attn` source build, and PAI inference in `ar1_venv`; AlpaSim remains A5 runtime blocker |
+| 2026-06-07 00:57:10 KST | A1 closed and A2 selected next | Teacher/Evaluator report and user confirmation satisfy A1 understanding gate; A2 should precede A3/A4 to control dataset/storage scope |
 
 ## User Understanding Check
 
@@ -165,12 +177,12 @@ Before marking any required Subtask `done`, the user should be able to answer:
 
 ## Next Step
 
-Start A1 with separate Expert and Teacher outputs:
+Start A2 with separate Expert and Teacher outputs:
 
-- `docs/2026-06-06 [Task] Track A1 Alpamayo Code and Model Flow Study.md`
-- Expert output: code/data/model flow evidence report.
-- Teacher output: user review note with explanation questions.
-- Manager output: Root Task status update after Expert/Teacher artifacts are reviewed.
+- Create `docs/2026-06-07 [Task] Track A2 PAI Dataset Literacy and Storage Strategy.md`.
+- Expert output: PAI manifest/component/chunk/storage evidence report.
+- Teacher output: user review note and storage/download decision test.
+- Manager output: approve or reject the first pilot subset before A3/A4.
 
 ## Admin Changelog
 
@@ -189,3 +201,4 @@ Start A1 with separate Expert and Teacher outputs:
 | 2026-05-27 12:39:31 KST | updated_at, roll-up, decision log, next step | v3 검토 계획 생성 및 다음 의사결정 반영 |
 | 2026-06-06 13:51:36 KST | parent_plan, updated_at, registry, roll-up, operating rule, decision log, next step | v3 canonical 승인 및 multi-session Manager/Expert/Teacher 운영 모델 반영 |
 | 2026-06-06 20:35:48 KST | updated_at, A0 detail block, roll-up, decision log | CUDA Toolkit 12.8 기반 README 경로 성공으로 A0 blocker 해소 및 AlpaSim blocker를 A5로 이관 |
+| 2026-06-07 00:57:10 KST | updated_at, A1 row, A1 block, A2-A8 block, roll-up, decision log, next step | A1 Teacher/Evaluator 확인 및 사용자 이해 gate 통과 보고에 따라 A1 done 처리와 A2 우선 진입 결정 반영 |

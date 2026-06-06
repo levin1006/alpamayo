@@ -1,12 +1,12 @@
 ---
 doc_type: task
 task_role: subtask
-status: in_progress
+status: done
 task_id: alpamayo-rnd-a1-code-model-flow
 parent_plan: docs/2026-05-27 [Plan] Alpamayo Research and Development v3.md
 parent_task: docs/2026-05-26 [Task] Alpamayo R&D Root Task.md
 created_at: 2026-06-06 13:51:36 KST
-updated_at: 2026-06-06 13:51:36 KST
+updated_at: 2026-06-07 00:57:10 KST
 ---
 
 # Track A1 Alpamayo Code and Model Flow Study
@@ -61,7 +61,7 @@ Responsibilities:
 
 Expected output:
 
-- `docs/2026-06-06 [Note] Track A1 Teacher Review Guide.md`
+- `docs/2026-06-06 [Note] Track A1 Code Flow Review Guide.md`
 
 ### Reviewer
 
@@ -132,8 +132,34 @@ This Subtask is done only when:
 - A1 should prefer read-only code inspection and, if needed, low-risk local probes.
 - The first useful handoff is from Manager to a separate VLA Expert Codex session.
 
+## Manager Closure Decision
+
+Verdict: `done`
+
+Closure time: `2026-06-07 00:57:10 KST`
+
+Evidence:
+
+- Expert report exists:
+  `docs/2026-06-06 [Report] Track A1 Expert Code Path Analysis.md`
+- Review report exists:
+  `docs/2026-06-06 [Review] Track A1 Expert Code Path Review.md`
+- Teacher/Evaluator note exists:
+  `docs/2026-06-06 [Note] Track A1 Code Flow Review Guide.md`
+- User reported understanding of the official `test_inference.py` path from input through
+  loader, processor/chat template, model generation, output, and metric.
+
+Manager interpretation:
+
+- A1 satisfies the minimum understanding gate for entering A2.
+- A3/A4 should not run a broader experiment matrix until A2 records safe PAI subset and storage
+  profiles.
+- A3/A4 must record runtime-loaded config, `num_traj_samples`, seed, clip selection, and output
+  schema as fresh evidence instead of relying only on A1 static analysis.
+
 ## Admin Changelog
 
 | Time (KST) | Field | Reason |
 | --- | --- | --- |
 | 2026-06-06 13:51:36 KST | created | v3 canonical 승인 후 첫 Phase A Subtask 생성 |
+| 2026-06-07 00:57:10 KST | status, updated_at, Teacher output, Manager Closure Decision | A1 Teacher/Evaluator 확인 및 사용자 이해 gate 통과 보고에 따라 A1 done 처리 |
