@@ -83,7 +83,7 @@ the `num_traj_samples=1` argument to a higher number (Line 60).
 
 ### Interactive notebook
 
-We provide a notebook with similar inference code at `notebook/inference.ipynb`.
+We provide a notebook with similar inference code at `notebooks/inference.ipynb`.
 
 ## Relationship with the Paper
 
@@ -168,7 +168,7 @@ alpamayo/
 │       ├── models/                      # Trainable wrappers
 │       ├── train_hf.py                  # Training script
 │       └── evaluate_hf.py               # Evaluation script
-├── notebook/
+├── notebooks/
 │   └── inference.ipynb                  # Example notebook
 ├── src/
 │   └── alpamayo_r1/

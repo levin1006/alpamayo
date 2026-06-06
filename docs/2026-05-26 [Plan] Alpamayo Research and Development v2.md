@@ -1,14 +1,14 @@
 ---
 doc_type: plan
-status: active
+status: superseded
 plan_id: alpamayo-rnd
 version: 2
-canonical: true
+canonical: false
 created_at: 2026-05-26 18:24:55 KST
 approved_at: 2026-05-26 18:24:55 KST
 root_plan: docs/2026-05-19 [Plan] Alpamayo Research and Development.md
 supersedes: docs/2026-05-19 [Plan] Alpamayo Research and Development.md
-superseded_by:
+superseded_by: docs/2026-05-27 [Plan] Alpamayo Research and Development v3.md
 root_task: docs/2026-05-26 [Task] Alpamayo R&D Root Task.md
 revision_type: full_replacement
 revision_reason: Plan baseline, Root Task, Subtask 문서 하네스 적용
@@ -122,3 +122,4 @@ Track B와 Track C는 일부 병렬 진행할 수 있다. 다만 Track E는 데�
 | Time (KST) | Field | Reason |
 | --- | --- | --- |
 | 2026-05-26 18:24:55 KST | created | 기존 roadmap을 새 Plan/Root Task/Subtask 하네스에 맞춰 canonical v2로 재구성 |
+| 2026-06-06 13:51:36 KST | status, canonical, superseded_by | 사용자 승인으로 v3가 canonical Plan이 되어 v2를 superseded 처리 |

@@ -1,0 +1,15 @@
+Script started on 2026-06-06 19:32:00+09:00 [COMMAND="zsh -ic 'source ar1_venv/bin/activate && CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python src/alpamayo_r1/test_inference.py'" <not executed on terminal>]
+/home/user/Workspace/alpamayo/ar1_venv/lib/python3.12/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Skipping import of cpp extensions due to incompatible torch version 2.8.0+cu128 for torchao version 0.15.0             Please see https://github.com/pytorch/ao/issues/2919 for more info
+/home/user/Workspace/alpamayo/ar1_venv/lib/python3.12/site-packages/torchao/quantization/quant_api.py:2511: SyntaxWarning: invalid escape sequence '\.'
+  """Configuration class for applying different quantization configs to modules or parameters based on their fully qualified names (FQNs).
+Loading dataset for clip_id: 030c760c-ae38-49aa-9ad8-f5650a545d26...
+Dataset loaded.
+Loading checkpoint shards:   0% 0/5 [00:00<?, ?it/s]Loading checkpoint shards: 100% 5/5 [00:00<00:00, 128.50it/s]
+Chain-of-Causation (per trajectory):
+ [['Nudge to the left to increase clearance from the construction cones encroaching into the lane.']]
+minADE: 2.5593724 meters
+Note: VLA-reasoning models produce nondeterministic outputs due to trajectory sampling, hardware differences, etc. With num_traj_samples=1 (set for GPU memory compatibility), variance in minADE is expected. For visual sanity checks, see notebooks/inference.ipynb
+
+Script done on 2026-06-06 19:32:44+09:00 [COMMAND_EXIT_CODE="0"]

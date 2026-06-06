@@ -28,6 +28,58 @@ result interpretation at a practical engineering level.
   track should stay small enough for the user to understand, reproduce, and
   challenge before the roadmap advances.
 
+### R&D Report Writing Discipline
+
+Alpamayo R&D documents must be written for a clear review decision, not as a
+dump of agent activity.
+
+- Before writing a report or note, state the document purpose, primary reader,
+  decision question, and exclusion scope. If those are unclear, narrow the
+  document before drafting.
+- Treat Track/Expert reports as decision documents. They should answer the
+  assigned question with a current conclusion, supporting evidence, reproducible
+  commands or paths, remaining blockers, and the next owner decision.
+- Do not use the user's required coverage list as the report order. Use it as a
+  checklist after deciding the argument structure.
+- Keep chronological execution detail in the assigned Task, an appendix, or
+  `docs/logs/`. Only include failed attempts in the main report body when they
+  change the final conclusion or blocker classification.
+- When historical failures and current results coexist, label each historical
+  failure with the date, environment, and whether it has since been resolved.
+  Resolved failures must not read like current blockers.
+- Raw command output belongs in log files unless a short excerpt is necessary to
+  justify the conclusion. Reports should summarize evidence and link the logs.
+- Plan immutability applies to approved Plan baselines, not to report prose. If a
+  report's structure is misleading, rewrite it into a complete decision document
+  while preserving underlying evidence in appendices, logs, or Tasks.
+- Before marking a report ready, check that a reviewer can answer: what is the
+  current state, what evidence proves it, what remains unresolved, who decides
+  the next step, and what historical details are no longer current.
+
+### Multi-Session Agent Operating Model
+
+Alpamayo R&D should be run as a multi-session, document-bus workflow when the
+task spans planning, experiments, implementation, or user learning. Do not treat
+role-specific agents as hidden subagents controlled only by one manager session.
+Each role may be a separate Codex conversation with the user, and cross-agent
+coordination must happen through repository documents.
+
+- Manager session: owns the canonical Plan linkage, Root Task, Subtask registry,
+  blocker roll-up, scope control, and next decision with the user.
+- VLA Expert session: owns repo/code/data/experiment investigation and reports
+  concrete evidence, commands, logs, metrics, and blocker classification.
+- Teacher session: owns user-facing learning notes, diagrams, concept reviews,
+  limitations, and review questions based on Expert evidence.
+- Reviewer session: optional independent check for important milestones, plan
+  changes, high-risk claims, or broad implementation changes.
+
+Manager is the only role that should update the Root Task. Expert and Teacher
+sessions should write separate report/note artifacts and may update only their
+assigned Subtask or output files. Before an agent starts, it should read the
+canonical Plan, Root Task, its assigned Subtask, and this AGENTS.md. If a role
+needs another role's result, it should read the corresponding repo document
+rather than relying on unstated conversation context.
+
 ## Build, Test, and Development Commands
 
 - `uv venv ar1_venv && source ar1_venv/bin/activate`: create and activate the local Python environment.
