@@ -61,24 +61,42 @@ dump of agent activity.
 Alpamayo R&D should be run as a multi-session, document-bus workflow when the
 task spans planning, experiments, implementation, or user learning. Do not treat
 role-specific agents as hidden subagents controlled only by one manager session.
-Each role may be a separate Codex conversation with the user, and cross-agent
-coordination must happen through repository documents.
+Each role may be a separate Codex conversation with the user when independence is
+needed, and cross-agent coordination must happen through repository documents.
 
 - Manager session: owns the canonical Plan linkage, Root Task, Subtask registry,
   blocker roll-up, scope control, and next decision with the user.
-- VLA Expert session: owns repo/code/data/experiment investigation and reports
-  concrete evidence, commands, logs, metrics, and blocker classification.
-- Teacher session: owns user-facing learning notes, diagrams, concept reviews,
-  limitations, and review questions based on Expert evidence.
+- VLA Expert-led track session: owns repo/code/data/experiment investigation,
+  reports concrete evidence, commands, logs, metrics, and blocker
+  classification, and normally also produces the Teacher/Evaluator note for the
+  same track.
+- Teacher/Evaluator mode: usually runs inside the Expert-led track session. It
+  turns Expert evidence into user-facing learning notes, diagrams, concept
+  reviews, limitations, review questions, and pass/partial/fail rubrics.
+- Independent Teacher session: optional. Use it only when the user still lacks
+  understanding after Expert-led coaching, when the Expert explanation quality
+  is insufficient, or when a foundational learning gate needs independent
+  pedagogy.
 - Reviewer session: optional independent check for important milestones, plan
   changes, high-risk claims, or broad implementation changes.
 
-Manager is the only role that should update the Root Task. Expert and Teacher
-sessions should write separate report/note artifacts and may update only their
-assigned Subtask or output files. Before an agent starts, it should read the
-canonical Plan, Root Task, its assigned Subtask, and this AGENTS.md. If a role
-needs another role's result, it should read the corresponding repo document
-rather than relying on unstated conversation context.
+Default track flow:
+
+1. Manager opens or updates the Subtask and states the decision gate.
+2. Expert-led session performs evidence work, answers user questions, updates
+   its own report when the explanation reveals gaps, and writes the
+   Teacher/Evaluator note.
+3. Manager reviews the report, Teacher/Evaluator note, and user understanding
+   evidence before changing Root Task status.
+4. Reviewer or independent Teacher is added only when the Manager identifies a
+   concrete review or learning risk.
+
+Manager is the only role that should update the Root Task. Expert-led sessions
+may update their assigned Subtask, Expert report, Teacher/Evaluator note, and
+supporting logs. Before an agent starts, it should read the canonical Plan, Root
+Task, its assigned Subtask, and this AGENTS.md. If a role needs another role's
+result, it should read the corresponding repo document rather than relying on
+unstated conversation context.
 
 ## Build, Test, and Development Commands
 

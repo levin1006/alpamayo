@@ -6,7 +6,7 @@ task_id: alpamayo-rnd-root
 parent_plan: docs/2026-05-27 [Plan] Alpamayo Research and Development v3.md
 parent_task:
 created_at: 2026-05-26 18:24:55 KST
-updated_at: 2026-06-07 00:57:10 KST
+updated_at: 2026-06-08 12:04:42 KST
 ---
 
 # Alpamayo R&D Root Task
@@ -29,11 +29,11 @@ updated_at: 2026-06-07 00:57:10 KST
 | --- | --- | --- | --- | --- |
 | A0 Environment and Access Baseline | done | yes | Manager | Review existing Track A Task |
 | A1 Code and Model Flow Study | done | yes | Manager + VLA Expert + Teacher | Closed; use A1 contract for A2-A4 |
-| A2 PAI Dataset Literacy and Storage Strategy | not_started | yes | Manager + VLA Expert + Teacher | Build manifest and subset budget |
-| A3 Inference Experiment Suite | not_started | yes | Manager + VLA Expert + Teacher | Run 5-clip pilot matrix |
-| A4 Visualization and Demo Lab | not_started | yes | Manager + VLA Expert + Teacher | Export first notebook visuals |
+| A2 PAI Dataset Literacy and Storage Strategy | done | yes | Manager + Expert-led session | Closed; use selected subset for A3/A4 |
+| A3 Inference Experiment Suite | in_progress | yes | Manager + Expert-led session | Run 5-clip pilot matrix |
+| A4 Visualization and Demo Lab | not_started | yes | Manager + Expert-led session | Export first notebook visuals |
 | A5 AlpaSim Closed-Loop Baseline | not_started | yes | Manager + VLA Expert + Reviewer | Diagnose container runtime blocker |
-| A6 Scene/3D Reconstruction Exploration | not_started | yes | Manager + VLA Expert + Teacher | Inventory geometry assets |
+| A6 Scene/3D Reconstruction Exploration | not_started | yes | Manager + Expert-led session | Inventory geometry assets |
 | A7 SFT Micro-Learning Baseline | not_started | yes | Manager + VLA Expert + Reviewer | Run dataloader sanity |
 | A8 RL Pipeline Literacy and Tiny Smoke | not_started | yes | Manager + VLA Expert + Reviewer | Run reward/prefetch smoke |
 | B Public Dataset Mapping | not_started | yes | Manager | Start after A1-A4 review |
@@ -92,14 +92,31 @@ Manager decision:
 - A2 should start before A3/A4 so dataset/storage profiles are explicit before broader runtime
   experiments and visualization outputs.
 
-### A2-A8 Phase A Baseline Lab
+### A2 PAI Dataset Literacy and Storage Strategy
 
-Status: `not_started`
+Status: `done`
+
+Outputs:
+
+- `docs/2026-06-07 [Task] Track A2 PAI Dataset Literacy and Storage Strategy.md`
+- `docs/2026-06-07 [Report] Track A2 PAI Dataset Literacy and Storage Strategy.md`
+- `docs/2026-06-08 [Note] Track A2 Dataset Literacy Review Guide.md`
+
+Manager decision:
+
+- A2 satisfies the minimum data literacy and storage decision gate.
+- Primary A3/A4 path is `/data/datasets/physical_ai_av/selected_chunks_10_multisensor`.
+- Fast smoke path is `/data/datasets/physical_ai_av/chunk_3119_a3a4_min`.
+- A6 lidar/radar/obstacle readiness is not proven by A2; treat those files as inventory material.
+
+### A3-A8 Phase A Baseline Lab
+
+Status: `in_progress`
 
 Next order:
 
-- Start A2 first: PAI manifest, component/chunk profile, storage budget, and approved pilot subset.
-- Then run A3 and A4 together or back-to-back on the A2-approved subset.
+- A3 starts first on the A2-approved subset.
+- A4 should follow A3 or run in tight coordination after A3 records output schema and result files.
 - A5-A8 remain queued until their first-gate blocker or smoke scope is explicitly opened.
 
 ### B/C Dataset Mapping
@@ -128,8 +145,11 @@ Next condition:
   - v3 is now the canonical Plan and reframes Phase A as Alpamayo Baseline Lab.
   - A1 code/model flow study is closed. The user understanding gate is satisfied for the
     official `test_inference.py` path and its limits.
-  - A2 is the next entry point. It should define PAI data/storage profiles before A3 inference
-    sweeps or A4 visualization demos.
+  - A2 is closed. The selected local PAI subset is sufficient to start A3/A4, with storage and
+    A6 caveats recorded.
+  - A3 is open. It should run a 5-clip pilot first and record runtime-loaded config, seed,
+    `num_traj_samples`, clip selection, output schema, CoC text, ADE/minADE, runtime, VRAM, and
+    failure reasons.
   - A3/A4 should record runtime-loaded config, `num_traj_samples`, seed, clip selection, and
     output schema as fresh evidence.
   - B/C are deferred until A1-A4 become reviewable, unless explicitly opened as low-priority
@@ -140,10 +160,16 @@ Next condition:
 ## Multi-Session Operating Rule
 
 - Manager session updates this Root Task and controls status roll-up.
-- VLA Expert sessions write evidence reports for assigned Subtasks.
-- Teacher sessions write user-facing learning/review notes based on Expert reports.
+- Default execution now uses Expert-led track sessions. The Expert-led session writes the evidence
+  report and normally also writes the Teacher/Evaluator note for the same track.
+- User Q&A, report correction, and Teacher/Evaluator note updates should normally stay in that
+  Expert-led session so explanation gaps can be fixed at the evidence source.
+- Independent Teacher sessions are optional and should be used only for unresolved understanding
+  gaps, insufficient Expert-led explanation quality, or foundational learning gates.
 - Reviewer sessions are used only for important milestones, plan changes, or high-risk claims.
 - Agent sessions coordinate through repository documents, not unstated cross-session context.
+- The v3 Plan body still contains the earlier separate Teacher wording as historical baseline
+  text. Current operating practice is governed by `AGENTS.md` and this Root Task rule.
 
 ## Decision Log
 
@@ -164,6 +190,8 @@ Next condition:
 | 2026-06-06 13:51:36 KST | A1 Subtask opened | First v3 step is to make the Alpamayo code/model flow explainable before larger data and experiment work |
 | 2026-06-06 20:35:48 KST | A0 official environment reproduction closed | CUDA Toolkit 12.8 enables README `uv sync --active`, locked `flash-attn` source build, and PAI inference in `ar1_venv`; AlpaSim remains A5 runtime blocker |
 | 2026-06-07 00:57:10 KST | A1 closed and A2 selected next | Teacher/Evaluator report and user confirmation satisfy A1 understanding gate; A2 should precede A3/A4 to control dataset/storage scope |
+| 2026-06-08 09:15:36 KST | Expert-led track flow adopted | User identified high coordination cost from separate Expert/Teacher loops; default flow now keeps Teacher/Evaluator note and user Q&A inside the Expert-led session |
+| 2026-06-08 12:04:42 KST | A2 closed and A3 opened | A2 Expert report, Teacher/Evaluator note, user learning completion, and read-only local subset checks satisfy A2 gate |
 
 ## User Understanding Check
 
@@ -177,12 +205,12 @@ Before marking any required Subtask `done`, the user should be able to answer:
 
 ## Next Step
 
-Start A2 with separate Expert and Teacher outputs:
+Start A3 through the Expert-led session:
 
-- Create `docs/2026-06-07 [Task] Track A2 PAI Dataset Literacy and Storage Strategy.md`.
-- Expert output: PAI manifest/component/chunk/storage evidence report.
-- Teacher output: user review note and storage/download decision test.
-- Manager output: approve or reject the first pilot subset before A3/A4.
+- `docs/2026-06-08 [Task] Track A3 Inference Experiment Suite.md`
+- Expert-led output: inference commands/scripts, 5-clip pilot table, runtime evidence, output
+  schema, and Teacher/Evaluator note.
+- Manager output: decide whether A3 is enough for A4 visualization or needs another inference pass.
 
 ## Admin Changelog
 
@@ -202,3 +230,5 @@ Start A2 with separate Expert and Teacher outputs:
 | 2026-06-06 13:51:36 KST | parent_plan, updated_at, registry, roll-up, operating rule, decision log, next step | v3 canonical 승인 및 multi-session Manager/Expert/Teacher 운영 모델 반영 |
 | 2026-06-06 20:35:48 KST | updated_at, A0 detail block, roll-up, decision log | CUDA Toolkit 12.8 기반 README 경로 성공으로 A0 blocker 해소 및 AlpaSim blocker를 A5로 이관 |
 | 2026-06-07 00:57:10 KST | updated_at, A1 row, A1 block, A2-A8 block, roll-up, decision log, next step | A1 Teacher/Evaluator 확인 및 사용자 이해 gate 통과 보고에 따라 A1 done 처리와 A2 우선 진입 결정 반영 |
+| 2026-06-08 09:15:36 KST | updated_at, registry owners, operating rule, decision log, next step | Expert와 Teacher를 기본 분리하지 않고 Expert-led session 안에서 report/note/Q&A를 처리하도록 하네스 조정 |
+| 2026-06-08 12:04:42 KST | updated_at, A2 row/block, A3 row, roll-up, decision log, next step | A2 학습 완료 및 local subset 확인에 따라 A2 done 처리와 A3 inference suite 시작 반영 |
