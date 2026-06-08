@@ -81,6 +81,10 @@ def plot_bev_frame(
     step: int,
     width: int = 580,
     height: int = 516,
+    xlim: tuple[float, float] | None = None,
+    ylim: tuple[float, float] | None = None,
+    stats_text: list[str] | None = None,
+    equal_aspect: bool = True,
 ) -> np.ndarray:
     fig, ax = plt.subplots(figsize=(width / 100, height / 100), dpi=100)
     hist_xy = rotate_90cc(history_xyz[:, :2].T)
@@ -97,17 +101,64 @@ def plot_bev_frame(
     ax.scatter([hist_xy[0, -1]], [hist_xy[1, -1]], c="black", marker="x", s=35, label="t0")
     ax.scatter([gt_xy[0, -1]], [gt_xy[1, -1]], c="#d62728", s=30)
     ax.scatter([pred_xy[0, -1]], [pred_xy[1, -1]], c="#1f77b4", s=30)
+    tick_indices = np.arange(9, min(len(full_gt), len(full_pred)), 10)
+    if len(tick_indices) > 0:
+        ax.scatter(full_gt[0, tick_indices], full_gt[1, tick_indices], c="#d62728", s=14, alpha=0.85)
+        ax.scatter(
+            full_pred[0, tick_indices],
+            full_pred[1, tick_indices],
+            c="#1f77b4",
+            s=14,
+            marker="s",
+            alpha=0.85,
+        )
+        for tick_index in tick_indices[::2]:
+            sec = (tick_index + 1) // 10
+            ax.annotate(
+                f"{sec}s",
+                (full_gt[0, tick_index], full_gt[1, tick_index]),
+                fontsize=6,
+                color="#9c1b1b",
+                xytext=(3, 3),
+                textcoords="offset points",
+            )
+    ax.annotate("GT 6.4s", (full_gt[0, -1], full_gt[1, -1]), fontsize=7, color="#9c1b1b")
+    ax.annotate(
+        "Pred 6.4s",
+        (full_pred[0, -1], full_pred[1, -1]),
+        fontsize=7,
+        color="#165a94",
+        xytext=(3, -9),
+        textcoords="offset points",
+    )
 
-    xs = np.concatenate([hist_xy[0], full_gt[0], full_pred[0]])
-    ys = np.concatenate([hist_xy[1], full_gt[1], full_pred[1]])
-    x_center = 0.5 * (xs.min() + xs.max())
-    y_center = 0.5 * (ys.min() + ys.max())
-    span = max(xs.max() - xs.min(), ys.max() - ys.min(), 4.0) * 1.25
-    ax.set_xlim(x_center - span / 2, x_center + span / 2)
-    ax.set_ylim(y_center - span / 2, y_center + span / 2)
-    ax.set_aspect("equal", adjustable="box")
+    if xlim is None or ylim is None:
+        xs = np.concatenate([hist_xy[0], full_gt[0], full_pred[0]])
+        ys = np.concatenate([hist_xy[1], full_gt[1], full_pred[1]])
+        x_center = 0.5 * (xs.min() + xs.max())
+        y_center = 0.5 * (ys.min() + ys.max())
+        span = max(xs.max() - xs.min(), ys.max() - ys.min(), 4.0) * 1.25
+        xlim = (x_center - span / 2, x_center + span / 2)
+        ylim = (y_center - span / 2, y_center + span / 2)
+    ax.set_xlim(*xlim)
+    ax.set_ylim(*ylim)
+    ax.set_aspect("equal" if equal_aspect else "auto", adjustable="box")
     ax.grid(True, linewidth=0.4, alpha=0.35)
-    ax.set_title(f"BEV trajectory progress: {step + 1}/64")
+    ax.axhline(0, color="#202020", linewidth=0.6, alpha=0.45)
+    ax.axvline(0, color="#202020", linewidth=0.6, alpha=0.45)
+    if stats_text:
+        ax.text(
+            0.02,
+            0.02,
+            "\n".join(stats_text),
+            transform=ax.transAxes,
+            fontsize=7,
+            va="bottom",
+            ha="left",
+            bbox={"facecolor": "white", "edgecolor": "#c8c8c8", "alpha": 0.82},
+        )
+    title_suffix = "fixed metric axes" if equal_aspect else "fixed independent axes"
+    ax.set_title(f"BEV trajectory progress: {step + 1}/64 | {title_suffix}")
     ax.set_xlabel("rotated x (m)")
     ax.set_ylabel("rotated y (m)")
     ax.legend(loc="upper right", fontsize=8)

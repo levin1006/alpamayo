@@ -1,0 +1,59 @@
+{
+  "run_id": "2026-06-08-a4-smoke-c23d0ac1",
+  "run_started": "2026-06-08 17:12:28 KST",
+  "run_finished": "2026-06-08 17:12:59 KST",
+  "run_runtime_sec": 30.975,
+  "dataset_root": "/data/datasets/physical_ai_av",
+  "clip_id": "c23d0ac1-fe93-4f25-bf71-198ccec5c190",
+  "chunk_id": 3119,
+  "t0_us_list": [
+    3100000,
+    4100000,
+    5100000,
+    6100000,
+    7100000
+  ],
+  "stride_us": 1000000,
+  "seed": 42,
+  "num_traj_samples": 1,
+  "num_traj_sets": 1,
+  "runtime_config": {
+    "model_id": "nvidia/Alpamayo-R1-10B",
+    "processor_id": "Qwen/Qwen3-VL-2B-Instruct",
+    "model_class": "AlpamayoR1",
+    "dtype": "torch.bfloat16",
+    "device_map": {
+      "": 0
+    },
+    "max_memory": {
+      "0": "23GiB"
+    },
+    "attn_implementation": null,
+    "tokens_per_history_traj": 48,
+    "tokens_per_future_traj": 128,
+    "traj_vocab_size": 4000,
+    "vlm_name_or_path": "Qwen/Qwen3-VL-8B-Instruct",
+    "model_load_sec": 16.02
+  },
+  "result_counts": {
+    "total": 5,
+    "success": 5,
+    "failed": 0
+  },
+  "runtime_sec_per_window": {
+    "mean": 2.148,
+    "max": 2.534
+  },
+  "peak_vram_mib": 22026.0,
+  "outputs": {
+    "jsonl": "experiments/a4_visualization/2026-06-08-a4-demo/smoke-c23d0ac1/results.jsonl",
+    "npz": "experiments/a4_visualization/2026-06-08-a4-demo/smoke-c23d0ac1/predictions.npz",
+    "video": "experiments/a4_visualization/2026-06-08-a4-demo/smoke-c23d0ac1/smoke_demo.mp4",
+    "manifest": "experiments/a4_visualization/2026-06-08-a4-demo/smoke-c23d0ac1/manifest.json",
+    "log": "docs/logs/2026-06-08-a4-smoke-c23d0ac1.log",
+    "docs_summary_json": "docs/artifacts/a4_visualization/2026-06-08-summary/2026-06-08-a4-smoke-c23d0ac1.json",
+    "docs_summary_md": "docs/artifacts/a4_visualization/2026-06-08-summary/2026-06-08-a4-smoke-c23d0ac1.md"
+  },
+  "metric_caveat": "num_traj_samples=1; minADE is single-sample ADE for this smoke.",
+  "validation_scope": "visual sanity/demo artifact only; not model quality or closed-loop validation."
+}
