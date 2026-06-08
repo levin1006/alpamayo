@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-06-08-a3-seed-check",
+  "run_started": "2026-06-08 12:20:07 KST",
+  "dataset_root": "/data/datasets/physical_ai_av",
+  "clip_id": "ac321da3-3848-4736-a9c2-053be0bea770",
+  "chunk_ids": [
+    3119
+  ],
+  "t0_us": 5100000,
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "num_traj_samples": 1,
+  "model_load_sec": 3.743,
+  "result_counts": {
+    "total": 3,
+    "success": 3,
+    "failed": 0
+  },
+  "outputs": {
+    "jsonl": "docs/artifacts/a3_inference/2026-06-08-seed-check/results.jsonl",
+    "log": "docs/logs/2026-06-08-a3-seed-check.log"
+  }
+}
