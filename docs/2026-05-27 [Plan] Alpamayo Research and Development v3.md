@@ -1,14 +1,14 @@
 ---
 doc_type: plan
-status: active
+status: superseded
 plan_id: alpamayo-rnd
 version: 3
-canonical: true
+canonical: false
 created_at: 2026-05-27 12:39:31 KST
 approved_at: 2026-06-06 13:51:36 KST
 root_plan: docs/2026-05-26 [Plan] Alpamayo Research and Development v2.md
 supersedes: docs/2026-05-26 [Plan] Alpamayo Research and Development v2.md
-superseded_by:
+superseded_by: /home/user/Workspace/alpamayo1.5/docs/2026-06-09 [Plan] Alpamayo 1.5 Research and Development v4.md
 root_task: docs/2026-05-26 [Task] Alpamayo R&D Root Task.md
 revision_type: full_replacement_proposal
 revision_reason: Reframe Phase A from a public-reproduction gate into a deep Alpamayo baseline lab before nuScenes/a2z expansion
@@ -16,8 +16,9 @@ revision_reason: Reframe Phase A from a public-reproduction gate into a deep Alp
 
 # Alpamayo Research and Development Plan v3
 
-This is the active canonical Plan for Alpamayo R&D. It replaces v2 and makes Phase A a deep
-Alpamayo baseline lab before broad nuScenes/a2z expansion.
+This Plan was the active canonical Plan for Alpamayo R&D after v2. It is now
+superseded by the Alpamayo 1.5 v4 Plan, which preserves the Phase A baseline
+lab structure while changing the active evidence target to Alpamayo 1.5.
 
 ## Revision Intent
 
@@ -508,3 +509,4 @@ Before moving to large public/self dataset work, the user should be able to answ
 | 2026-06-06 12:25:33 KST | Track Registry, Track Summary Blocks | 긴 설명을 표 밖의 블록 구조로 이동하여 narrow pane 가독성 개선 |
 | 2026-06-06 12:25:33 KST | Track Registry, Track Summary Blocks | Plan에서 실행 status를 관리하는 것으로 오해되지 않도록 `Status` 표현을 `v3 placement`로 교체 |
 | 2026-06-06 13:51:36 KST | status, canonical, approved_at, opening, Execution Operating Model | 사용자 승인에 따라 v3를 canonical Plan으로 활성화하고 multi-session 운영 모델 반영 |
+| 2026-06-09 15:13:38 KST | status, canonical, superseded_by, opening | Alpamayo 1.5 v4 Plan 승인 및 A0 실행 착수에 따라 v3를 historical baseline Plan으로 supersede |
