@@ -45,6 +45,18 @@ DEFAULT_CLIP_ID = "c23d0ac1-fe93-4f25-bf71-198ccec5c190"
 DEFAULT_CHUNK_ID = 3119
 DEFAULT_T0_US = [3_100_000, 4_100_000, 5_100_000, 6_100_000, 7_100_000]
 BEV_PANEL_SIZE = (880, 620)
+FUTURE_DT_SECONDS = 0.1
+BEV_SCALE_PRESETS = [
+    ("low_speed", (-25.0, 65.0)),
+    ("medium_speed", (-35.0, 170.0)),
+    ("high_speed", (-70.0, 300.0)),
+]
+BEV_SPEED_THRESHOLDS_MPS = [
+    ("low_speed", 5.0),
+    ("medium_speed", 15.0),
+    ("high_speed", float("inf")),
+]
+BevView = tuple[tuple[float, float], tuple[float, float], str, float | None, float | None]
 
 
 def parse_args() -> argparse.Namespace:
@@ -184,6 +196,40 @@ def rotated_bev_xy(xyz: np.ndarray) -> np.ndarray:
     return np.stack([-xy[1], xy[0]], axis=0)
 
 
+def metric_x_limits(ylim: tuple[float, float]) -> tuple[float, float]:
+    y_span = ylim[1] - ylim[0]
+    x_span = y_span * BEV_PANEL_SIZE[0] / BEV_PANEL_SIZE[1]
+    return (-x_span / 2, x_span / 2)
+
+
+def future_path_length_m(xyz: np.ndarray) -> float:
+    origin = np.zeros((1, 3), dtype=np.float32)
+    path = np.concatenate([origin, xyz[:, :3]], axis=0)
+    return float(np.linalg.norm(np.diff(path[:, :2], axis=0), axis=1).sum())
+
+
+def select_bev_scale(gt_avg_speed_mps: float) -> tuple[str, tuple[float, float]]:
+    scale_map = dict(BEV_SCALE_PRESETS)
+    for scale_name, upper_mps in BEV_SPEED_THRESHOLDS_MPS:
+        if gt_avg_speed_mps < upper_mps:
+            return scale_name, scale_map[scale_name]
+    return BEV_SCALE_PRESETS[-1]
+
+
+def compute_bev_view_for_row(
+    *,
+    row: dict[str, Any],
+    predictions: dict[str, np.ndarray],
+) -> BevView:
+    keys = row["output_npz_keys"]
+    gt_xyz = predictions[keys["ego_future_xyz"]][0, 0]
+    gt_length_m = future_path_length_m(gt_xyz)
+    horizon_sec = max(float(len(gt_xyz)) * FUTURE_DT_SECONDS, FUTURE_DT_SECONDS)
+    gt_avg_speed_mps = gt_length_m / horizon_sec
+    scale_name, ylim = select_bev_scale(gt_avg_speed_mps)
+    return metric_x_limits(ylim), ylim, scale_name, gt_length_m, gt_avg_speed_mps
+
+
 def compute_bev_view(
     *,
     rows: list[dict[str, Any]],
@@ -204,27 +250,19 @@ def compute_bev_view(
         xs.append(pred_xy[0])
         ys.append(pred_xy[1])
 
-    def metric_x_limits(ylim: tuple[float, float]) -> tuple[float, float]:
-        y_span = ylim[1] - ylim[0]
-        x_span = y_span * BEV_PANEL_SIZE[0] / BEV_PANEL_SIZE[1]
-        return (-x_span / 2, x_span / 2)
-
     if not xs or not ys:
-        ylim = (-16.0, 85.0)
-        return metric_x_limits(ylim), ylim, "medium"
+        scale_name, ylim = BEV_SCALE_PRESETS[1]
+        return metric_x_limits(ylim), ylim, scale_name
 
     all_x = np.concatenate(xs)
     all_y = np.concatenate(ys)
     y_min = float(all_y.min())
     y_max = float(all_y.max())
-    if y_max <= 35.0 and y_min >= -8.0:
-        ylim = (-8.0, 40.0)
-        return metric_x_limits(ylim), ylim, "short"
-    if y_max <= 80.0 and y_min >= -16.0:
-        ylim = (-16.0, 85.0)
-        return metric_x_limits(ylim), ylim, "medium"
-    ylim = (-20.0, 125.0)
-    return metric_x_limits(ylim), ylim, "long"
+    for scale_name, ylim in BEV_SCALE_PRESETS:
+        if y_min >= ylim[0] and y_max <= ylim[1]:
+            return metric_x_limits(ylim), ylim, scale_name
+    scale_name, ylim = BEV_SCALE_PRESETS[-1]
+    return metric_x_limits(ylim), ylim, scale_name
 
 
 def future_path_stats(
@@ -259,7 +297,7 @@ def build_video_frame(
     total_frames: int,
     avdi: PhysicalAIAVDatasetLocalInterface,
     predictions: dict[str, np.ndarray],
-    bev_view: tuple[tuple[float, float], tuple[float, float], str],
+    bev_view: BevView,
 ) -> np.ndarray:
     data = load_physical_aiavdataset(
         row["clip_id"],
@@ -357,7 +395,6 @@ def write_smoke_video(
     manifest: list[dict[str, Any]] = []
     if not success_rows:
         return manifest
-    bev_view = compute_bev_view(rows=success_rows, predictions=predictions)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     tmp_output_path = output_path.with_name(f"{output_path.stem}.tmp{output_path.suffix}")
@@ -371,9 +408,10 @@ def write_smoke_video(
     if not writer.isOpened():
         raise RuntimeError(f"Failed to open video writer for {tmp_output_path}")
 
-    preview_path = output_path.with_name("preview_window_00.png")
+    preview_path = output_path.with_name(f"{output_path.stem}_preview_window_00.png")
     try:
         for frame_index, row in enumerate(success_rows):
+            bev_view = compute_bev_view_for_row(row=row, predictions=predictions)
             frame = build_video_frame(
                 row=row,
                 frame_index=frame_index,
@@ -398,6 +436,13 @@ def write_smoke_video(
                     "bev_xlim": list(bev_view[0]),
                     "bev_ylim": list(bev_view[1]),
                     "bev_scale": bev_view[2],
+                    "gt_path_length_m": round(float(bev_view[3]), 3)
+                    if bev_view[3] is not None
+                    else None,
+                    "gt_avg_speed_mps": round(float(bev_view[4]), 3)
+                    if bev_view[4] is not None
+                    else None,
+                    "bev_scale_policy": "per-window gt future average speed",
                 }
             )
     finally:

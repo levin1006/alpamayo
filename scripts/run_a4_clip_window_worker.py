@@ -45,6 +45,7 @@ TOP_P = 0.98
 TEMPERATURE = 0.6
 MAX_GENERATION_LENGTH = 256
 VIDEO_FPS = 10
+COMPLETED_INFERENCE_STATUSES = {"complete", "complete_with_failures"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -131,6 +132,72 @@ def normalize_failure_reason(row: dict[str, Any]) -> None:
     failure_message = str(row.get("failure_message") or "").lower()
     if "requested timestamps must be within the range of timestamps" in failure_message:
         row["failure_reason"] = "invalid_window_timestamp"
+
+
+def read_json_if_valid(path: Path) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+
+
+def existing_inference_output_state(clip_output_dir: Path) -> dict[str, Any]:
+    summary_path = clip_output_dir / "run_summary.json"
+    summary = read_json_if_valid(summary_path)
+    if summary is None:
+        return {
+            "complete": False,
+            "reason": "missing_or_invalid_run_summary",
+            "run_summary": str(summary_path),
+        }
+
+    completion_status = summary.get("completion_status")
+    if completion_status not in COMPLETED_INFERENCE_STATUSES:
+        return {
+            "complete": False,
+            "reason": "incomplete_summary_status",
+            "completion_status": completion_status,
+            "run_summary": str(summary_path),
+        }
+
+    outputs = summary.get("outputs") or {}
+    results_path = Path(outputs.get("jsonl") or clip_output_dir / "results.jsonl")
+    predictions_output = outputs.get("npz")
+    predictions_path = Path(predictions_output) if predictions_output else clip_output_dir / "predictions.npz"
+    success_count = int(summary.get("success") or 0)
+    predictions_required = success_count > 0
+    if not results_path.exists():
+        return {
+            "complete": False,
+            "reason": "missing_results_jsonl",
+            "completion_status": completion_status,
+            "run_summary": str(summary_path),
+            "results_jsonl": str(results_path),
+        }
+    if predictions_required and not predictions_path.exists():
+        return {
+            "complete": False,
+            "reason": "missing_predictions_npz",
+            "completion_status": completion_status,
+            "run_summary": str(summary_path),
+            "predictions_npz": str(predictions_path),
+        }
+
+    return {
+        "complete": True,
+        "reason": "existing_complete_inference_output",
+        "completion_status": completion_status,
+        "run_summary": str(summary_path),
+        "results_jsonl": str(results_path),
+        "predictions_npz": str(predictions_path) if predictions_required else None,
+        "expected_windows": summary.get("expected_windows"),
+        "processed_windows": summary.get("processed_windows"),
+        "success": summary.get("success"),
+        "failed": summary.get("failed"),
+        "outputs": outputs,
+    }
 
 
 def write_clip_outputs(
@@ -239,29 +306,79 @@ def main() -> None:
             f"No manifest rows selected for worker={args.worker_name}, "
             f"clip_ids={args.clip_ids}, chunk_ids={args.chunk_ids}"
         )
-    chunk_ids = sorted({int(row["chunk_id"]) for row in manifest_rows})
-    clip_ids = list(dict.fromkeys(row["clip_id"] for row in manifest_rows))
-    avdi = PhysicalAIAVDatasetLocalInterface(DATASET_ROOT, chunk_ids=chunk_ids)
-
     logger = EventLogger(args.log_dir / f"{args.run_name}-{args.worker_name}.log")
+    selected_clip_ids = list(dict.fromkeys(row["clip_id"] for row in manifest_rows))
+    selected_chunk_ids = sorted({int(row["chunk_id"]) for row in manifest_rows})
+    pending_manifest_rows: list[dict[str, Any]] = []
+    pending_clip_ids: list[str] = []
+    skipped_outputs: list[dict[str, Any]] = []
+    for clip_id in selected_clip_ids:
+        clip_rows = [row for row in manifest_rows if row["clip_id"] == clip_id]
+        output_state = existing_inference_output_state(args.output_root / clip_id)
+        if output_state["complete"]:
+            skipped = {
+                "clip_id": clip_id,
+                "expected_windows": len(clip_rows),
+                "skip_reason": output_state["reason"],
+                "completion_status": output_state.get("completion_status"),
+                "processed_windows": output_state.get("processed_windows"),
+                "success": output_state.get("success"),
+                "failed": output_state.get("failed"),
+                "outputs": output_state.get("outputs"),
+            }
+            skipped_outputs.append(skipped)
+            logger.write({"event": "clip_skipped_existing_output", **skipped})
+            continue
+        pending_clip_ids.append(clip_id)
+        pending_manifest_rows.extend(clip_rows)
+
     logger.write(
         {
             "event": "a4_clip_worker_start",
             "run_started": now_kst(),
             "worker_name": args.worker_name,
-            "clip_ids": clip_ids,
-            "chunk_ids": chunk_ids,
+            "selected_clip_ids": selected_clip_ids,
+            "selected_chunk_ids": selected_chunk_ids,
+            "pending_clip_ids": pending_clip_ids,
+            "pending_chunk_ids": sorted({int(row["chunk_id"]) for row in pending_manifest_rows}),
+            "skipped_existing_output_clips": len(skipped_outputs),
             "manifest_path": str(args.manifest_path),
             "output_root": str(args.output_root),
             "windows": len(manifest_rows),
+            "pending_windows": len(pending_manifest_rows),
             "offline": offline_env,
         }
     )
+
+    worker_start = time.perf_counter()
+    if not pending_manifest_rows:
+        worker_summary = {
+            "run_id": args.run_name,
+            "worker_name": args.worker_name,
+            "selected_clip_ids": selected_clip_ids,
+            "clip_ids": [],
+            "chunk_ids": [],
+            "runtime_sec": round(time.perf_counter() - worker_start, 3),
+            "outputs": [],
+            "skipped_outputs": skipped_outputs,
+        }
+        (args.output_root / f"{args.worker_name}_summary.json").write_text(
+            json.dumps(worker_summary, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        logger.write({"event": "a4_clip_worker_finished", **worker_summary})
+        logger.close()
+        return
+
+    manifest_rows = pending_manifest_rows
+    clip_ids = pending_clip_ids
+    chunk_ids = sorted({int(row["chunk_id"]) for row in manifest_rows})
+    avdi = PhysicalAIAVDatasetLocalInterface(DATASET_ROOT, chunk_ids=chunk_ids)
+
     model_args = make_row_args(args, manifest_rows[0])
     model, processor, runtime_config = load_model_and_processor(model_args)
     logger.write({"event": "model_loaded", "runtime_config": runtime_config})
 
-    worker_start = time.perf_counter()
     worker_outputs: list[dict[str, Any]] = []
     for clip_id in clip_ids:
         clip_rows = [row for row in manifest_rows if row["clip_id"] == clip_id]
@@ -353,10 +470,12 @@ def main() -> None:
     worker_summary = {
         "run_id": args.run_name,
         "worker_name": args.worker_name,
+        "selected_clip_ids": selected_clip_ids,
         "clip_ids": clip_ids,
         "chunk_ids": chunk_ids,
         "runtime_sec": round(time.perf_counter() - worker_start, 3),
         "outputs": worker_outputs,
+        "skipped_outputs": skipped_outputs,
     }
     (args.output_root / f"{args.worker_name}_summary.json").write_text(
         json.dumps(worker_summary, indent=2, ensure_ascii=False),
